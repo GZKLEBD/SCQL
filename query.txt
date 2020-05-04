@@ -1,0 +1,102 @@
+文中实验使用的SCQL语法描述如下：
+（1）Q1（重写于LUBM）：
+FROM stream [http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Universities%s]
+WSize [1s] 	WSilde[1s]
+SPARQL [
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>
+SELECT ?X ?Y ?Z
+WHERE
+{?X rdf:type ub:GraduateStudent .
+  ?Y rdf:type ub:University .
+  ?Z rdf:type ub:Department .
+  ?X ub:memberOf ?Z .
+  ?Z ub:subOrganizationOf ?Y .
+  ?X ub:undergraduateDegreeFrom ?Y} ]
+
+
+（2）Q2（重写于LUBM）：
+FROM stream [http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Universities%s]
+WSize [1s] 	WSilde[1s]
+SPARQL [
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>
+SELECT ?X ?Y1 ?Y2 ?Y3 ?Y4
+WHERE
+{?X rdf:type ub:FullProfessor .
+  ?X ub:worksFor ?Y1 .
+  ?X ub:name ?Y2 .
+  ?X ub:emailAddress ?Y3 .
+  ?X ub:telephone ?Y4} ]
+
+
+（3）Q3（重写于SR Bench）：
+FROM stream [http://www.cwi.nl/SRBench/observations#Stations%s]
+WSize [1s] 	WSilde[1s]
+SPARQL [
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX om-owl: <http://knoesis.wright.edu/ssw/ont/sensor-observation.owl#>
+PREFIX weather: <http://knoesis.wright.edu/ssw/ont/weather.owl#>
+SELECT ?sensor ?value ?uom ?result
+WHERE {
+   {?observation om-owl:procedure ?sensor .
+   ?observation rdf:type weather:RainfallObservation .
+   ?observation om-owl:result ?result . }
+   { ?result om-owl:floatValue ?value .
+   ?result om-owl:uom ?uom }} ]
+
+
+（4）Q4（重写于SR Bench）：
+FROM stream [http://www.cwi.nl/SRBench/observations#Stations%s]
+WSize [1s] 	WSilde[1s]
+SPARQL [
+PREFIX om-owl: <http://knoesis.wright.edu/ssw/ont/sensor-observation.owl#>
+PREFIX weather: <http://knoesis.wright.edu/ssw/ont/weather.owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?sensor
+WHERE {
+  ?observation om-owl:procedure ?sensor ;
+               om-owl:observedProperty weather:_WindSpeed ;
+               om-owl:result ?result .
+  ?result om-owl:floatValue ?value . }
+GROUP BY ?sensor
+HAVING ( AVG(?value) >= 10.0 ) ]
+
+
+（5）Q5（重写于SR Bench）：
+FROM stream [http://www.cwi.nl/SRBench/observations#Stations%s]
+WSize [1s] 	WSilde[1s]
+SPARQL [
+PREFIX om-owl: <http://knoesis.wright.edu/ssw/ont/sensor-observation.owl#>
+PREFIX weather: <http://knoesis.wright.edu/ssw/ont/weather.owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?sensor ?result
+WHERE {
+  { ?observation om-owl:procedure ?sensor ;
+                 a weather:VisibilityObservation ;
+                 om-owl:result ?result .
+    ?result om-owl:floatValue ?value .
+    FILTER ( ?value < 10.0 )  # centimeters }
+  UNION
+  { ?observation om-owl:procedure ?sensor ;
+                 a weather:RainfallObservation ;
+                 om-owl:result ?result .
+    ?result om-owl:floatValue ?value .
+    FILTER ( ?value > 30.0)  # centimeters }
+  UNION
+  { ?observation om-owl:procedure ?sensor ;
+                 a weather:SnowfallObservation .}
+}]
+
+
+（6）Q6（重写于SR Bench）：
+FROM stream [http://www.cwi.nl/SRBench/observations#Stations%s]
+WSize [1s] 	WSilde[1s]
+SPARQL [
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX om-owl: <http://knoesis.wright.edu/ssw/ont/sensor-observation.owl#>
+PREFIX weather: <http://knoesis.wright.edu/ssw/ont/weather.owl#>
+SELECT ?result ?value
+WHERE {
+   ?observation om-owl:result ?result .
+   ?result om-owl:floatValue ?value  }]
